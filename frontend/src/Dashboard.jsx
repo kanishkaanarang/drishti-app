@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { useNavigate } from 'react-router-dom'
+import ShipmentList from './ShipmentList'
 
 export default function Dashboard() {
   const [user, setUser] = useState(null)
+  const [role, setRole] = useState('')
   const [team, setTeam] = useState('export')
   const navigate = useNavigate()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) navigate('/')
-      else setUser(data.user)
+      else {
+        setUser(data.user)
+        setRole(data.user.user_metadata?.role || 'employee')
+      }
     })
   }, [])
 
@@ -20,13 +25,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ padding: 32, maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ padding: 32, maxWidth: 1200, margin: '0 auto' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 24, color: '#1A3C6E' }}>Drishti Global — Shipment Portal</h1>
-          <p style={{ margin: '4px 0 0', color: '#888', fontSize: 13 }}>{user?.email}</p>
+          <p style={{ margin: '4px 0 0', color: '#888', fontSize: 13 }}>
+            {user?.email} &nbsp;•&nbsp;
+            <span style={{
+              background: role === 'admin' ? '#E8F5E9' : '#E3F2FD',
+              color: role === 'admin' ? '#2E7D32' : '#0D47A1',
+              padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600
+            }}>
+              {role === 'admin' ? '⚙ Admin' : '👤 Employee'}
+            </span>
+          </p>
         </div>
         <button onClick={handleLogout}
           style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
@@ -58,19 +72,20 @@ export default function Dashboard() {
           </button>
         )}
         {team === 'import' && (
-          <button
-            style={{ padding: '10px 24px', background: '#ccc', color: 'white', border: 'none', borderRadius: 6, cursor: 'not-allowed', fontWeight: 500 }}
-            disabled>
+          <button disabled
+            style={{ padding: '10px 24px', background: '#ccc', color: 'white', border: 'none', borderRadius: 6, cursor: 'not-allowed', fontWeight: 500 }}>
             + New Import Shipment (Coming Soon)
           </button>
         )}
       </div>
 
-      {/* Placeholder Table */}
-      <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 40, textAlign: 'center', color: '#aaa' }}>
-        <p style={{ fontSize: 15 }}>No shipments yet. Add your first one using the button above.</p>
-      </div>
-
+      {/* Shipment List */}
+      {team === 'export' && <ShipmentList role={role} />}
+      {team === 'import' && (
+        <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 40, textAlign: 'center', color: '#aaa' }}>
+          <p>Import team module coming soon.</p>
+        </div>
+      )}
     </div>
   )
 }
