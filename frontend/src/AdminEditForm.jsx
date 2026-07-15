@@ -90,8 +90,7 @@ export default function AdminEditForm() {
     if (error) { setError(error.message); setSaving(false); return }
     setSuccess(true)
     setSaving(false)
-    setTimeout(() => navigate(`/shipment/${id}`), 1500)
-  }
+    setTimeout(() => navigate(`/shipment/${id}`, { replace: true }), 1500)  }
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>Loading...</div>
 
